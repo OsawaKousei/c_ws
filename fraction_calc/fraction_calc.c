@@ -17,15 +17,16 @@ void print_result(fraction result);
 int main(void)
 {
     int num;
-
     int choice; // 1: add, 2: sub, 3: mul, 4: div
     fraction *fractions;
-    fractions = (fraction *)malloc(sizeof(fraction) * (num + 1)); // 0番目をresultに使う
 
     while (1)
     {
-        printf("enter number of fraction (enter 0 to quit)\n: ");
+        printf("enter number of fraction. (enter 0 to quit): ");
         scanf("%d", &num);
+
+        // 動的メモリ確保
+        fractions = (fraction *)malloc(sizeof(fraction) * (num + 1)); // 0番目をresultに使う
 
         if (num == 0)
         {
@@ -44,6 +45,9 @@ int main(void)
         {
             printf("ERROR: Denominator is 0\n");
         }
+
+        // メモリ解放
+        free(fractions);
     }
 
     return 0;
