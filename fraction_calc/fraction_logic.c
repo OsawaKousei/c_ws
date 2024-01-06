@@ -56,3 +56,14 @@ void div_fraction(fraction f1, fraction f2, fraction *result)
 
     about_fraction(result);
 }
+bool check_denominator(fraction f1)
+{
+    if (f1.denominator == 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}

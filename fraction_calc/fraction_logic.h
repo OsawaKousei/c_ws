@@ -1,3 +1,4 @@
+#include <stdbool.h>
 typedef struct
 {
     int numerator;
@@ -9,3 +10,4 @@ void sub_fraction(fraction f1, fraction f2, fraction *result);
 void mul_fraction(fraction f1, fraction f2, fraction *result);
 void div_fraction(fraction f1, fraction f2, fraction *result);
 void about_fraction(fraction *result);
+bool check_denominator(fraction f1);

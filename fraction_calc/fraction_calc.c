@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "fraction_logic.h" //自作ヘッダファイルは""で囲む
 
 enum
@@ -7,18 +8,25 @@ enum
     ADD = 1,
     SUB,
     MUL,
-    DIV
+    DIV,
+    STOP
 };
 
-void get_input(fraction *f1, fraction *f2, int *choice);
+typedef struct
+{
+    fraction fractions;
+    int operation;
+} formula;
+
+void get_input(formula formulas[], int i);
 void calculate_fraction(fraction f1, fraction f2, fraction *result, int choice);
 void print_result(fraction result);
 
 int main(void)
 {
     int num;
-    int choice; // 1: add, 2: sub, 3: mul, 4: div
-    fraction *fractions;
+    int choice; // 1: add, 2: sub, 3: mul, 4: div, 5: stop
+    formula *formulas;
 
     while (1)
     {
@@ -26,7 +34,7 @@ int main(void)
         scanf("%d", &num);
 
         // 動的メモリ確保
-        fractions = (fraction *)malloc(sizeof(fraction) * (num + 1)); // 0番目をresultに使う
+        formulas = (formula *)malloc(sizeof(formula) * (num + 2)); // 0番目をresultに使う,n+1番目は終了処理を一般化するため確保
 
         if (num == 0)
         {
@@ -34,39 +42,39 @@ int main(void)
             break;
         }
 
-        get_input(&fractions[1], &fractions[2], &choice);
+        for (int i = 1; i <= num; i++)
+        {
 
-        if (fractions[1].denominator != 0 && fractions[2].denominator != 0)
-        {
-            calculate_fraction(fractions[1], fractions[2], &fractions[0], choice);
-            print_result(fractions[0]);
+            get_input(formulas, i);
+            if (!check_denominator(formulas[i].fractions))
+            {
+                printf("ERROR: denominator is 0\n");
+                i--;
+            }
         }
-        else
+
+        for (int i = 1; i <= num; i++)
         {
-            printf("ERROR: Denominator is 0\n");
+            calculate_fraction(formulas[i].fractions, formulas[i + 1].fractions, &formulas[0].fractions, formulas[i].operation);
         }
+        print_result(formulas[0].fractions);
 
         // メモリ解放
-        free(fractions);
+        free(formulas);
     }
 
     return 0;
 }
 
-void get_input(fraction *f1, fraction *f2, int *choice)
+void get_input(formula formulas[], int i)
 {
-    printf("Enter operation (1 = add, 2 = sub, 3 = mul, 4 = div, 5 = quit): ");
-    scanf("%d", choice);
+    printf("Enter fraction %d numerator: ", i);
+    scanf("%d", formulas[i].fractions.numerator);
+    printf("Enter fraction %d denominator: ", i);
+    scanf("%d", formulas[i].fractions.denominator);
 
-    printf("Enter fraction 1 numerator: ");
-    scanf("%d", &f1->numerator);
-    printf("Enter fraction 1 denominator: ");
-    scanf("%d", &f1->denominator);
-
-    printf("Enter fraction 2 numerator: ");
-    scanf("%d", &f2->numerator);
-    printf("Enter fraction 2 denominator: ");
-    scanf("%d", &f2->denominator);
+    printf("Enter operation (1 = add, 2 = sub, 3 = mul, 4 = div, 5 = stop): ");
+    scanf("%d", formulas[i].operation);
 }
 
 void calculate_fraction(fraction f1, fraction f2, fraction *result, int choice)
@@ -74,27 +82,31 @@ void calculate_fraction(fraction f1, fraction f2, fraction *result, int choice)
     switch (choice)
     {
     case ADD:
-        printf("OK calculate %d / %d + %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
+        printf("calculate %d / %d + %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
         add_fraction(f1, f2, result);
         break;
 
     case SUB:
-        printf("OK calculate %d / %d - %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
+        printf("calculate %d / %d - %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
         sub_fraction(f1, f2, result);
         break;
 
     case MUL:
-        printf("OK calculate %d / %d × %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
+        printf("calculate %d / %d × %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
         mul_fraction(f1, f2, result);
         break;
 
     case DIV:
-        printf("OK calculate %d / %d ÷ %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
+        printf("calculate %d / %d ÷ %d / %d\n", f1.numerator, f1.denominator, f2.numerator, f2.denominator);
         div_fraction(f1, f2, result);
         break;
 
+    case STOP:
+        printf("calculate finished\n");
+        break;
+
     default:
-        printf("ERROR: Invalid input\n");
+        printf("ERROR: something went mad\n");
         break;
     }
 }
